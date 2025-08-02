@@ -74,6 +74,11 @@ return {
       { '<leader>u', '<cmd>UndotreeToggle<CR>', desc = 'Toggle Undotree' },
     },
   },
+  -- {
+  --   'davidmh/mdx.nvim',
+  --   config = true,
+  --   dependencies = { 'nvim-treesitter/nvim-treesitter' },
+  -- },
 }
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
