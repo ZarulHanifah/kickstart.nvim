@@ -1,7 +1,7 @@
 vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
 
 require('oil').setup {
-  default_file_explorer = true,
+  default_file_explorer = false,
   -- Id is automatically added at the beginning, and name at the end
   -- See :help oil-columns
   columns = {

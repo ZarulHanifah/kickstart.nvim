@@ -1,4 +1,22 @@
--- Resize splits with arrow keys
+--Toggle between (un)comment
+
+-- Normal mode: toggle comment on the current line
+vim.keymap.set('n', '<C-_>', function()
+  local line = vim.fn.line '.'
+  require('mini.comment').toggle_lines(line, line)
+end, { desc = 'Toggle comment on current line' })
+
+-- Visual mode: toggle comment on the selected lines
+vim.keymap.set('v', '<C-_>', function()
+  local start_line = vim.fn.line 'v'
+  local end_line = vim.fn.line '.'
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
+  end
+  require('mini.comment').toggle_lines(start_line, end_line)
+end, { desc = 'Toggle comment on selection' })
+
+---- Resize splits with arrow keys
 vim.keymap.set('n', '<C-Up>', ':resize +2<CR>', { silent = true })
 vim.keymap.set('n', '<C-Down>', ':resize -2<CR>', { silent = true })
 vim.keymap.set('n', '<C-Left>', ':vertical resize -2<CR>', { silent = true })
@@ -9,6 +27,10 @@ vim.keymap.set('x', '<leader>p', '"_dP')
 
 -- Ctrl-C is same as Esc
 vim.keymap.set('i', '<C-c>', '<Esc>')
+
+-- Quickfixlist cnext and cprev
+vim.keymap.set('n', '<M-j>', '<cmd>cnext<CR>')
+vim.keymap.set('n', '<M-k>', '<cmd>cprev<CR>')
 
 -- Global search replace
 vim.keymap.set('n', '<leader>S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], {

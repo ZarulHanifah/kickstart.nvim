@@ -29,12 +29,21 @@ return {
   },
   { -- NERDTREE
     'preservim/nerdtree',
+    config = function()
+      -- Open NERDTree when Vim starts if no files are specified
+      vim.cmd [[
+        autocmd StdinReadPre * let s:std_in=1
+        autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+      ]]
+    end,
   },
   {
     'stevearc/oil.nvim',
     ---@module 'oil'
     -- ---@type oil.SetupOpts
-    opts = {},
+    opts = {
+      default_file_explorer = false,
+    },
     -- Optional dependencies
     dependencies = { { 'echasnovski/mini.icons', opts = {} } },
     -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if you prefer nvim-web-devicons
