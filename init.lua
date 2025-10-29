@@ -599,6 +599,12 @@ require('lazy').setup({
     },
   },
 
+  {
+    'saghen/blink.compat',
+    version = '*',
+    opts = { impersonate_nvim_cmp = false },
+  },
+
   { -- Autocompletion
     'saghen/blink.cmp',
     event = 'VimEnter',
@@ -673,9 +679,10 @@ require('lazy').setup({
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'path', 'cmdline', 'snippets', 'buffer', 'lazydev', 'vimtex' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+          vimtex = { name = 'vimtex', module = 'blink.compat.source', score_offset = 3 },
         },
       },
 
