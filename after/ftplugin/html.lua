@@ -1,6 +1,3 @@
--- local set = vim.opt_local
---
--- set.shiftwidth = 2
 vim.bo.expandtab = true -- Convert tab to spaces
 vim.bo.shiftwidth = 4 -- Indent size
 vim.bo.tabstop = 4 -- Tab width when displaying

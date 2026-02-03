@@ -23,6 +23,10 @@ return {
   },
   { -- Comfortable motions
     'yuttie/comfortable-motion.vim',
+    init = function()
+      vim.g.comfortable_motion_disable_ctrl_b = true
+      vim.g.comfortable_motion_disable_ctrl_f = true
+    end,
   },
   { -- Automatic closing quotes/parenthesis/brackets
     'Raimondi/delimitMate',

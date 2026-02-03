@@ -1,3 +1,72 @@
-local set = vim.opt_local
+vim.cmd 'runtime plugin/vimtex.vim'
+-- vim.cmd 'VimtexReload'
+--
+-- if not package.loaded['vimtex'] then
+--   vim.notify('I WAS RAN THROUGH!', vim.log.levels.INFO)
+--   return
+-- end
 
-set.shiftwidth = 2
+-- local set = vim.opt_local
+-- set.shiftwidth = 2
+--
+--
+-- local function get_main_tex()
+--   if vim.fn.exists 'vimtex#core#get_main_file' == 1 then
+--     return vim.fn['vimtex#core#get_main_file']()
+--   end
+--   if vim.fn.exists 'vimtex#state#get_current' == 1 then
+--     local state = vim.fn['vimtex#state#get_current']()
+--     if type(state) == 'table' and state.tex then
+--       return state.tex
+--     end
+--   end
+--   return vim.fn.expand '%:p'
+-- end
+--
+-- local function compile_latex_with_bib()
+--   local main_tex = get_main_tex()
+--   if main_tex == '' or not vim.fn.filereadable(main_tex) then
+--     vim.notify('❌ Invalid main file! Open root .tex first', vim.log.levels.ERROR)
+--     return
+--   end
+--
+--   if vim.fn.expand '%:p' ~= main_tex then
+--     vim.notify('💡 Compiling from: ' .. vim.fn.fnamemodify(main_tex, ':.'), vim.log.levels.WARN)
+--   end
+--
+--   local base = vim.fn.fnamemodify(main_tex, ':r')
+--   local proj_root = vim.fn.fnamemodify(main_tex, ':h')
+--   local cwd = vim.fn.getcwd()
+--
+--   vim.cmd 'VimtexClean'
+--   vim.cmd('lcd ' .. vim.fn.fnameescape(proj_root))
+--
+--   local function run_step(step, cmd)
+--     vim.fn.system(cmd)
+--     if vim.v.shell_error ~= 0 then
+--       vim.cmd('lcd ' .. vim.fn.fnameescape(cwd))
+--       error 'Step failed'
+--     end
+--   end
+--
+--   pcall(function()
+--     run_step('1/4', 'pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main_tex))
+--     run_step('2/4', 'bibtex ' .. vim.fn.shellescape(base))
+--     run_step('3/4', 'pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main_tex))
+--     run_step('4/4', 'pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main_tex))
+--   end)
+--
+--   vim.cmd('lcd ' .. vim.fn.fnameescape(cwd))
+-- end
+--
+-- if vim.b.vimtex then
+--   vim.keymap.set('n', '<leader>lA', compile_latex_with_bib, { buffer = true })
+-- else
+--   vim.api.nvim_create_autocmd('User', {
+--     pattern = 'VimtexEventInitPost',
+--     buffer = 0,
+--     callback = function()
+--       vim.keymap.set('n', '<leader>lA', compile_latex_with_bib, { buffer = true })
+--     end,
+--   })
+-- end
