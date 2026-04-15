@@ -1,6 +1,14 @@
 -- zarul.lua
 --
 
+local builtin = require 'telescope.builtin'
+
+vim.keymap.set('n', '<leader>st', function()
+  builtin.colorscheme {
+    enable_preview = true,
+  }
+end, { desc = 'Telescope colorscheme' })
+
 return {
   { -- THEMES
     -- 'folke/tokyonight.nvim',

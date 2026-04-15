@@ -17,7 +17,7 @@ local function create_floating_window(opts)
   local row = math.floor((vim.o.lines - height) / 2)
 
   local buf = nil
-  if vim.api.nvim_buf_is_valid(opts.buf) then
+  if opts.buf and opts.buf > 0 and vim.api.nvim_buf_is_valid(opts.buf) then
     buf = opts.buf
   else
     buf = vim.api.nvim_create_buf(false, true)
@@ -43,6 +43,7 @@ local toggle_terminal = function()
     state.floating = create_floating_window { buf = state.floating.buf }
     if vim.bo[state.floating.buf].buftype ~= 'terminal' then
       vim.cmd.terminal()
+      vim.cmd 'startinsert'
       vim.b[state.floating.buf].is_floating_terminal = true
     end
   else
@@ -50,8 +51,66 @@ local toggle_terminal = function()
   end
 end
 
+local run_python_terminal_interactive = function()
+  local current_file = vim.api.nvim_buf_get_name(0)
+  if vim.bo.filetype ~= 'python' then
+    vim.notify('Not a python file', vim.log.levels.WARN)
+    return
+  end
+
+  -- Save the file before running
+  vim.cmd 'silent! write'
+
+  local win_info = create_floating_window()
+  -- vim.fn.termopen { 'python', current_file }
+  vim.cmd('terminal python -i ' .. vim.fn.shellescape(current_file))
+  vim.cmd 'startinsert'
+
+  vim.api.nvim_create_autocmd('BufEnter', {
+    buffer = win_info.buf,
+    command = 'startinsert',
+  })
+
+  -- Close the window with 'q' when the process is done
+  vim.keymap.set('n', 'q', function()
+    if vim.api.nvim_win_is_valid(win_info.win) then
+      vim.api.nvim_win_close(win_info.win, true)
+    end
+  end, { buffer = win_info.buf, silent = true })
+end
+
+local run_python_terminal = function()
+  local current_file = vim.api.nvim_buf_get_name(0)
+  if vim.bo.filetype ~= 'python' then
+    vim.notify('Not a python file', vim.log.levels.WARN)
+    return
+  end
+
+  -- Save the file before running
+  vim.cmd 'silent! write'
+
+  local win_info = create_floating_window()
+  -- vim.fn.termopen { 'python', current_file }
+  vim.cmd('terminal python ' .. vim.fn.shellescape(current_file))
+  vim.cmd 'startinsert'
+
+  vim.api.nvim_create_autocmd('BufEnter', {
+    buffer = win_info.buf,
+    command = 'startinsert',
+  })
+
+  -- Close the window with 'q' when the process is done
+  vim.keymap.set('n', 'q', function()
+    if vim.api.nvim_win_is_valid(win_info.win) then
+      vim.api.nvim_win_close(win_info.win, true)
+    end
+  end, { buffer = win_info.buf, silent = true })
+end
+
 vim.api.nvim_create_user_command('Floaterminal', toggle_terminal, {})
 vim.keymap.set({ 'n', 't' }, '<space>tt', toggle_terminal, { desc = 'Floating terminal' })
+vim.keymap.set('n', '<leader>tpp', run_python_terminal, { desc = 'Run Python in floating terminal' })
+vim.keymap.set('n', '<leader>tpi', run_python_terminal_interactive, { desc = 'Run interactive Python in floating terminal' })
 
 return {}
 
