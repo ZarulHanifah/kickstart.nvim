@@ -78,12 +78,6 @@ return {
       })
     end,
   },
-  { -- treesitter playground
-    'nvim-treesitter/playground',
-  },
-  { -- treesitter playground
-    'nvim-treesitter/playground',
-  },
   -- { -- pydoc
   --   'girishji/pythondoc.vim',
   --   ft = 'python'
