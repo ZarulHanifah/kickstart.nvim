@@ -51,6 +51,35 @@ local toggle_terminal = function()
   end
 end
 
+local get_python_info = function()
+  local file_path = vim.api.nvim_buf_get_name(0)
+  local filename = vim.fn.fnamemodify(file_path, ':t')
+  local dir = vim.fn.fnamemodify(file_path, ':p:h')
+
+  local parts = {}
+  if filename ~= '__init__.py' then
+    table.insert(parts, 1, vim.fn.fnamemodify(filename, ':r'))
+  end
+
+  local current = dir
+  while true do
+    if vim.fn.filereadable(current .. '/__init__.py') ~= 1 then
+      break
+    end
+    table.insert(parts, 1, vim.fn.fnamemodify(current, ':t'))
+    local parent = vim.fn.fnamemodify(current, ':h')
+    if parent == current then
+      break
+    end
+    current = parent
+  end
+
+  local module_name = table.concat(parts, '.')
+  local project_root = current
+
+  return module_name, project_root
+end
+
 local run_python_terminal_interactive = function()
   local current_file = vim.api.nvim_buf_get_name(0)
   if vim.bo.filetype ~= 'python' then
@@ -61,9 +90,11 @@ local run_python_terminal_interactive = function()
   -- Save the file before running
   vim.cmd 'silent! write'
 
+  local module_name, project_root = get_python_info()
+
   local win_info = create_floating_window()
   -- vim.fn.termopen { 'python', current_file }
-  vim.cmd('terminal python -i ' .. vim.fn.shellescape(current_file))
+  vim.cmd('terminal PYTHONPATH=' .. vim.fn.shellescape(project_root) .. ' python -i -m ' .. module_name)
   vim.cmd 'startinsert'
 
   vim.api.nvim_create_autocmd('BufEnter', {
@@ -89,9 +120,11 @@ local run_python_terminal = function()
   -- Save the file before running
   vim.cmd 'silent! write'
 
+  local module_name, project_root = get_python_info()
+
   local win_info = create_floating_window()
   -- vim.fn.termopen { 'python', current_file }
-  vim.cmd('terminal python ' .. vim.fn.shellescape(current_file))
+  vim.cmd('terminal PYTHONPATH=' .. vim.fn.shellescape(project_root) .. ' python -m ' .. module_name)
   vim.cmd 'startinsert'
 
   vim.api.nvim_create_autocmd('BufEnter', {
