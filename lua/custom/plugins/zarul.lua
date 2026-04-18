@@ -89,6 +89,10 @@ return {
       { '<leader>u', '<cmd>UndotreeToggle<CR>', desc = 'Toggle Undotree' },
     },
   },
+  {
+    'sphamba/smear-cursor.nvim',
+    opts = {},
+  },
   -- {
   --   'davidmh/mdx.nvim',
   --   config = true,
