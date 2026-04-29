@@ -44,7 +44,7 @@ vim.keymap.set('n', '<leader>S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><
   desc = 'Substitute word under cursor (global, case-insensitive)',
 })
 
-vim.keymap.set('n', '<leader>cc', function()
+local function format_iterables_with_commas_to_multiple_line()
   local line = vim.api.nvim_get_current_line()
   local prefix, open, inner, close = line:match '^(.-)([%[{%(])%s*(.-)%s*([%]}%)])$'
   if not prefix then
@@ -73,7 +73,34 @@ vim.keymap.set('n', '<leader>cc', function()
 
   -- Replace current line with the formatted block
   vim.api.nvim_buf_set_lines(0, vim.fn.line '.' - 1, vim.fn.line '.', false, new_lines)
-end, { desc = 'Format dict/list/tuple inline to multi-line', noremap = true, silent = true })
+end
+
+vim.keymap.set(
+  'n',
+  '<leader>cc',
+  format_iterables_with_commas_to_multiple_line,
+  { desc = 'Format dict/list/tuple inline to multi-line', noremap = true, silent = true }
+)
+
+local function toggle_visual_motion()
+  -- Check if 'j' is currently mapped to 'gj'
+  local map = vim.fn.maparg('j', 'n', false, true)
+  local is_visual = map.rhs == 'gj'
+
+  if is_visual then
+    -- Switch to Standard Motion
+    pcall(vim.keymap.del, 'n', 'j', { buffer = true })
+    pcall(vim.keymap.del, 'n', 'k', { buffer = true })
+    vim.notify 'Standard Motion (Paragraph to Paragraph)'
+  else
+    -- Switch to Visual Motion
+    vim.keymap.set('n', 'j', 'gj', { buffer = true, silent = true })
+    vim.keymap.set('n', 'k', 'gk', { buffer = true, silent = true })
+    vim.notify 'Visual Motion (Line by Line)'
+  end
+end
+
+vim.keymap.set('n', '<leader>tw', toggle_visual_motion, { desc = 'Toggle gj/gk motion' })
 
 return {}
 
