@@ -1,20 +1,27 @@
 --Toggle between (un)comment
 
--- Normal mode: toggle comment on the current line
-vim.keymap.set('n', '<C-_>', function()
-  local line = vim.fn.line '.'
-  require('mini.comment').toggle_lines(line, line)
-end, { desc = 'Toggle comment on current line' })
-
--- Visual mode: toggle comment on the selected lines
-vim.keymap.set('v', '<C-_>', function()
+local toggle_comment = function()
+  if vim.fn.mode() == 'i' or vim.fn.mode() == 'R' then
+    return
+  end
   local start_line = vim.fn.line 'v'
   local end_line = vim.fn.line '.'
   if start_line > end_line then
     start_line, end_line = end_line, start_line
   end
   require('mini.comment').toggle_lines(start_line, end_line)
-end, { desc = 'Toggle comment on selection' })
+end
+
+-- Normal mode
+vim.keymap.set('n', '<C-_>', function()
+  local line = vim.fn.line '.'
+  require('mini.comment').toggle_lines(line, line)
+end, { desc = 'Comment line' })
+vim.keymap.set('n', '<C-/>', '<C-_>', { remap = true }) -- redirect C-/ to C-_
+
+-- VIsual mode
+vim.keymap.set('v', '<C-_>', toggle_comment, { desc = 'Comment selection' })
+vim.keymap.set('v', '<C-/>', '<C-_>', { remap = true })
 
 ---- Resize splits with arrow keys
 vim.keymap.set('n', '<C-Up>', ':resize +2<CR>', { silent = true })

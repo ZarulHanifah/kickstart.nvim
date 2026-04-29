@@ -733,7 +733,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'typescript', 'tsx' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'typescript', 'tsx', 'latex' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -743,15 +743,45 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
+      sync_install = true,
+      install_branches = {
+        latex = 'master',
+      },
       indent = { enable = true, disable = { 'ruby' } },
+      parser_install_info = {
+        latex = {
+          install_info = {
+            url = 'https://github.com/latex-lsp/tree-sitter-latex',
+            files = { 'src/parser.c', 'src/scanner.c' }, -- Use the already generated C files
+            branch = 'master',
+          },
+        },
+      },
     },
-    config = function()
+    config = function(_, opts)
+      -- Setup main treesitter engine
+      require('nvim-treesitter.configs').setup(opts)
+
+      -- init context plugin explicitly
+      require('treesitter-context').setup {
+        enable = true,
+        exclude_fnames = { 'tex', 'latex' },
+      }
+
+      -- filetype logic
       vim.filetype.add {
         extension = {
           mdx = 'markdown',
         },
       }
     end,
+
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter-context',
+      'nvim-treesitter/nvim-treesitter-textobjects',
+      'JoosepAlviste/nvim-ts-context-commentstring',
+      'windwp/nvim-ts-autotag',
+    },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
