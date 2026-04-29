@@ -1,3 +1,49 @@
+local function doi_to_cursor()
+  vim.ui.input({ prompt = 'Enter DOI: ' }, function(doi)
+    if not doi or doi == '' then
+      return
+    end
+
+    vim.notify '⏳ Fetching BibTeX...'
+
+    local url = 'https://api.crossref.org/works/' .. doi .. '/transform/application/x-bibtex'
+
+    vim.fn.jobstart({ 'curl', '-s', '-L', url }, {
+      stdout_buffered = true,
+      on_stdout = function(_, data)
+        if not data or #data == 0 then
+          return
+        end
+
+        local lines = {}
+        for _, line in ipairs(data) do
+          -- Strip carriage returns and trim whitespace
+          local cleaned = line:gsub('\r', ''):gsub('^%s*(.-)%s*$', '%1')
+          if cleaned ~= '' then
+            table.insert(lines, cleaned)
+          end
+        end
+
+        if #lines > 0 then
+          local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+          -- We insert at 'row-1' for 0-indexed positioning,
+          -- or 'row' to put it exactly where the cursor is.
+          vim.api.nvim_buf_set_lines(0, row, row, false, lines)
+          vim.notify('✅ BibTeX inserted!', vim.log.levels.INFO)
+        end
+      end,
+      on_stderr = function(_, data)
+        -- Only notify if there's an actual error message that isn't empty
+        if data and data[1] ~= '' then
+          vim.notify('❌ Connection Issue', vim.log.levels.ERROR)
+        end
+      end,
+    })
+  end)
+end
+
+vim.keymap.set('n', '<leader>d2b', doi_to_cursor, { desc = 'Fetch DOI and insert at cursor' })
+
 return {
   {
     'lervag/vimtex',
@@ -5,66 +51,53 @@ return {
     -- tag = "v2.15", -- uncomment to pin to a specific release
     init = function()
       -- VimTeX configuration goes here, e.g.
-      vim.g.vimtex_imaps_enabled = 0 -- disable VimTex insert mode mappings
       vim.g.vimtex_view_method = 'zathura'
-      vim.g.vimtex_view_automatic = 1
       vim.g.vimtex_compiler_method = 'latexmk'
-      vim.g.vimtex_fold_enabled = 1
-      vim.g.vimtex_quickfix_open_on_warning = 0 -- dont open quickfix if only warnings
-      -- ftplugin stuff
-      vim.g.vimtex_loaded = 1
-      vim.cmd [[ doautocmd User VimtexLoaded ]]
+
       vim.g.vimtex_compiler_latexmk = {
-        backend = 'nvim',
-        build_dir = 'build',
-        build_dir_set = true,
+        out_dir = 'build',
         callback = 1,
         continuous = 1,
-        use_jobs = 0,
-        executable = 'latexmk',
         options = {
           '-pdf',
-          -- '-pdflatex=pdflatex',
-          '-synctex=1',
-          -- '-bibtex',
-          '-file-line-error',
-          '-halt-on-error',
-          '-interaction=nonstopmode',
           '-shell-escape',
           '-verbose',
-          '-outdir=build',
+          '-file-line-error',
+          '-synctex=1',
+          '-interaction=nonstopmode',
         },
       }
+      vim.g.vimtex_quickfix_open_on_warning = 0
       vim.o.foldmethod = 'expr'
       vim.o.foldexpr = 'vimtex#fold#level(v:lnum)'
       vim.o.foldtext = 'vimtex#fold#text()'
       vim.o.foldlevel = 2
     end,
-    config = function()
-      vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'tex',
-        callback = function()
-          if vim.b.vimtex then
-            local function compile_latex_with_bib()
-              vim.cmd 'VimtexClean'
-              local main = vim.b.vimtex.tex
-              local base = vim.fn.fnamemodify(main, ':r')
-              local proj_root = vim.fn.fnamemodify(main, ':h')
-              local cwd = vim.fn.getcwd()
-
-              vim.cmd('lcd' .. vim.fn.fnameescape(proj_root))
-
-              vim.fn.system('pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main))
-              vim.fn.system('bibtex ' .. vim.fn.shellescape(base))
-              vim.fn.system('pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main))
-              vim.fn.system('pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main))
-              vim.cmd('lcd' .. vim.fn.fnameescape(proj_root))
-            end
-            vim.keymap.set('n', '<leader>lA', compile_latex_with_bib, { buffer = true })
-          end
-        end,
-      })
-    end,
+    -- config = function()
+    --   vim.api.nvim_create_autocmd('FileType', {
+    --     pattern = 'tex',
+    --     callback = function()
+    --       if vim.b.vimtex then
+    --         local function compile_latex_with_bib()
+    --           -- vim.cmd 'VimtexClean'
+    --           local main = vim.b.vimtex.tex
+    --           local base = vim.fn.fnamemodify(main, ':r')
+    --           local proj_root = vim.fn.fnamemodify(main, ':h')
+    --           local cwd = vim.fn.getcwd()
+    --
+    --           vim.cmd('lcd' .. vim.fn.fnameescape(proj_root))
+    --
+    --           vim.fn.system('pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main))
+    --           vim.fn.system('bibtex ' .. vim.fn.shellescape(base))
+    --           vim.fn.system('pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main))
+    --           vim.fn.system('pdflatex -interaction=nonstopmode -file-line-error ' .. vim.fn.shellescape(main))
+    --           vim.cmd('lcd' .. vim.fn.fnameescape(proj_root))
+    --         end
+    --         vim.keymap.set('n', '<leader>lA', compile_latex_with_bib, { buffer = true })
+    --       end
+    --     end,
+    --   })
+    -- end,
   },
   {
     'nvim-telescope/telescope-bibtex.nvim',
