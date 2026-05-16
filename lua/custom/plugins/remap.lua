@@ -44,6 +44,28 @@ vim.keymap.set('n', '<leader>S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><
   desc = 'Substitute word under cursor (global, case-insensitive)',
 })
 
+-- Global toggle variable
+_G.CompletionEnabled = true
+
+vim.keymap.set('n', '<leader>ct', function()
+  _G.CompletionEnabled = not _G.CompletionEnabled
+
+  if _G.CompletionEnabled then
+    -- Restore all events and behavior
+    vim.opt.eventignore = ''
+    vim.notify 'Completion: ENABLED'
+  else
+    -- Ignore the events that trigger auto-completion and snippet expansion
+    -- 'InsertEnter', 'TextChangedI', 'TextChangedP' are what trigger the engines
+    vim.opt.eventignore = 'InsertEnter,TextChangedI,TextChangedP'
+
+    -- Force clear the menu one last time
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-e>', true, true, true), 'n', true)
+
+    vim.notify 'Completion/Snippets: SILENCED'
+  end
+end, { desc = 'Toggle Completion and Snippets' })
+
 local function format_iterables_with_commas_to_multiple_line()
   local line = vim.api.nvim_get_current_line()
   local prefix, open, inner, close = line:match '^(.-)([%[{%(])%s*(.-)%s*([%]}%)])$'
