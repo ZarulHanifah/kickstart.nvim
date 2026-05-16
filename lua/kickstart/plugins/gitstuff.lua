@@ -2,7 +2,31 @@
 -- NOTE: gitsigns is already included in init.lua but contains only the base
 -- config. This will add also the recommended keymaps.
 
+-- Add this to your init.lua or gitstuff.lua
+vim.api.nvim_create_autocmd('BufEnter', {
+  pattern = '*',
+  callback = function()
+    -- Only re-attach if we are in a git file
+    if vim.fn.isdirectory '.git' == 1 or vim.fn.system('git rev-parse --is-inside-work-tree'):match 'true' then
+      require('gitsigns').attach()
+    end
+  end,
+})
+
 return {
+  {
+    'tpope/vim-fugitive',
+    config = function()
+      -- keymaps
+      vim.keymap.set('n', '<leader>gs', vim.cmd.Git, { desc = 'Git [s]tatus' })
+      vim.keymap.set('n', '<leader>gp', function()
+        vim.cmd.Git 'push'
+      end, { desc = 'Git [p]ush' })
+      vim.keymap.set('n', '<leader>gl', function()
+        vim.cmd.Git 'pull'
+      end, { desc = 'Git [p]ull' })
+    end,
+  },
   {
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -56,6 +80,10 @@ return {
         map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
         map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
       end,
+      -- Zarul added
+      update_debounce = 50,
+      status_formatter = nil,
+      attach_to_untracked = true,
     },
   },
 }
