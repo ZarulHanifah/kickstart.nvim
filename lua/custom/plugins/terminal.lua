@@ -145,6 +145,126 @@ vim.keymap.set({ 'n', 't' }, '<space>tt', toggle_terminal, { desc = 'Floating te
 vim.keymap.set('n', '<leader>tpp', run_python_terminal, { desc = 'Run Python in floating terminal' })
 vim.keymap.set('n', '<leader>tpi', run_python_terminal_interactive, { desc = 'Run interactive Python in floating terminal' })
 
+local run_js_ts_terminal = function()
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local extension = vim.fn.expand '%:e'
+
+  -- Map extensions to their respective runners
+  local runners = {
+    js = 'node',
+    mjs = 'node',
+    ts = 'tsx',
+    mts = 'tsx',
+  }
+
+  local cmd = runners[extension]
+
+  if not cmd then
+    vim.notify('Not a supported JS/TS file (.' .. extension .. ')', vim.log.levels.WARN)
+    return
+  end
+
+  -- Save before running
+  vim.cmd 'silent! write'
+
+  -- Assuming create_floating_window() is defined elsewhere in your config
+  local win_info = create_floating_window()
+
+  -- Run the file with the mapped command
+  -- We use 'tsx' for TS and 'node' for JS
+  vim.cmd('terminal ' .. cmd .. ' ' .. vim.fn.shellescape(current_file))
+  vim.cmd 'startinsert'
+
+  -- Close with 'q'
+  vim.keymap.set('n', 'q', function()
+    if vim.api.nvim_win_is_valid(win_info.win) then
+      vim.api.nvim_win_close(win_info.win, true)
+    end
+  end, { buffer = win_info.buf, silent = true })
+end
+
+-- Keymap
+vim.keymap.set('n', '<leader>tj', run_js_ts_terminal, { desc = 'Run JS/TS in floating terminal' })
+local run_js_ts_terminal = function()
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local extension = vim.fn.expand '%:e'
+
+  -- Map extensions to their respective runners
+  local runners = {
+    js = 'node',
+    mjs = 'node',
+    ts = 'tsx',
+    mts = 'tsx',
+  }
+
+  local cmd = runners[extension]
+
+  if not cmd then
+    vim.notify('Not a supported JS/TS file (.' .. extension .. ')', vim.log.levels.WARN)
+    return
+  end
+
+  -- Save before running
+  vim.cmd 'silent! write'
+
+  -- Assuming create_floating_window() is defined elsewhere in your config
+  local win_info = create_floating_window()
+
+  -- Run the file with the mapped command
+  -- We use 'tsx' for TS and 'node' for JS
+  vim.cmd('terminal ' .. cmd .. ' ' .. vim.fn.shellescape(current_file))
+  vim.cmd 'startinsert'
+
+  -- Close with 'q'
+  vim.keymap.set('n', 'q', function()
+    if vim.api.nvim_win_is_valid(win_info.win) then
+      vim.api.nvim_win_close(win_info.win, true)
+    end
+  end, { buffer = win_info.buf, silent = true })
+end
+
+-- Keymap
+vim.keymap.set('n', '<leader>tj', run_js_ts_terminal, { desc = 'Run JS/TS in floating terminal' })
+local run_js_ts_terminal = function()
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local extension = vim.fn.expand '%:e'
+
+  -- Map extensions to their respective runners
+  local runners = {
+    js = 'node',
+    mjs = 'node',
+    ts = 'tsx',
+    mts = 'tsx',
+  }
+
+  local cmd = runners[extension]
+
+  if not cmd then
+    vim.notify('Not a supported JS/TS file (.' .. extension .. ')', vim.log.levels.WARN)
+    return
+  end
+
+  -- Save before running
+  vim.cmd 'silent! write'
+
+  -- Assuming create_floating_window() is defined elsewhere in your config
+  local win_info = create_floating_window()
+
+  -- Run the file with the mapped command
+  -- We use 'tsx' for TS and 'node' for JS
+  vim.cmd('terminal ' .. cmd .. ' ' .. vim.fn.shellescape(current_file))
+  vim.cmd 'startinsert'
+
+  -- Close with 'q'
+  vim.keymap.set('n', 'q', function()
+    if vim.api.nvim_win_is_valid(win_info.win) then
+      vim.api.nvim_win_close(win_info.win, true)
+    end
+  end, { buffer = win_info.buf, silent = true })
+end
+
+-- Keymap
+vim.keymap.set('n', '<leader>tj', run_js_ts_terminal, { desc = 'Run JS/TS in floating terminal' })
 return {}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
