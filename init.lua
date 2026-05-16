@@ -539,6 +539,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'isort', -- Used to format Python code
+        'black', -- Used to format Python code
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -575,15 +577,15 @@ require('lazy').setup({
     opts = {
       notify_on_error = false,
       format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = {
+          c = true,
+          cpp = true,
+        }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
           return {
-            timeout_ms = 500,
+            timeout_ms = 2000,
             lsp_format = 'fallback',
           }
         end
@@ -594,7 +596,16 @@ require('lazy').setup({
         python = { 'isort', 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier' },
+        typescript = { 'prettierd', 'prettier' },
+      },
+      formatters = {
+        prettier = {
+          args = { '--stdin-filepath', '$FILENAME', '--tab-width', '2', '--no-tabs' },
+        },
+        prettierd = {
+          args = { '--stdin-filepath', '$FILENAME', '--tab-width', '2', '--no-tabs' },
+        },
       },
     },
   },
@@ -614,15 +625,14 @@ require('lazy').setup({
       {
         'L3MON4D3/LuaSnip',
         version = '2.*',
-        build = (function()
-          -- Build Step is needed for regex support in snippets.
+        build = function()
           -- This step is not supported in many windows environments.
           -- Remove the below condition to re-enable on windows.
           if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
             return
           end
           return 'make install_jsregexp'
-        end)(),
+        end,
         dependencies = {
           {
             'rafamadriz/friendly-snippets',
@@ -762,6 +772,18 @@ require('lazy').setup({
       -- Setup main treesitter engine
       require('nvim-treesitter.configs').setup(opts)
 
+      require('nvim-treesitter.configs').setup {
+        -- ... your other TS config (highlight, indent, etc.)
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = '<C-space>', -- Ctrl + Space to start
+            node_incremental = '<C-space>', -- Ctrl + Space to expand
+            scope_incremental = '<C-s>', -- Ctrl + S to grab the whole "scope"
+            node_decremental = '<C-S-space>', -- Alt + Space to shrink (go back a layer)
+          },
+        },
+      }
       -- init context plugin explicitly
       require('treesitter-context').setup {
         enable = true,
@@ -801,7 +823,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
-  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitstuff', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -842,6 +864,10 @@ vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.o.foldlevel = 96
 vim.o.foldlevelstart = 96
 vim.o.foldenable = true
+-- test
+-- vim.opt.foldtext = 'hello'
+
+vim.env.PATH = vim.fn.stdpath 'data' .. '/mason/bin:' .. vim.env.PATH
 
 vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufNewFile' }, {
   pattern = '*',
@@ -856,6 +882,13 @@ vim.api.nvim_create_autocmd('BufReadPost', {
         vim.cmd 'silent! normal! zx'
       end
     end, 50) -- short delay to let Treesitter parse
+  end,
+})
+
+-- Disable automatic comment insertion on new lines
+vim.api.nvim_create_autocmd('BufEnter', {
+  callback = function()
+    vim.opt.formatoptions:remove { 'c', 'r', 'o' }
   end,
 })
 
