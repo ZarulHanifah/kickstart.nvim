@@ -62,22 +62,23 @@ return {
     -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
     lazy = false,
   },
-  { -- fold python code
-    'tmhedberg/SimpylFold',
-    dependencies = {
-      'Konfekt/FastFold',
-    },
-    config = function()
-      vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'python',
-        callback = function()
-          vim.opt.foldlevel = 99
-          vim.opt.foldlevelstart = 99
-          vim.opt.foldenable = true
-        end,
-      })
-    end,
-  },
+  -- { -- fold python code
+  --   'tmhedberg/SimpylFold',
+  --   dependencies = {
+  --     'Konfekt/FastFold',
+  --   },
+  --   config = function()
+  --     vim.api.nvim_create_autocmd('FileType', {
+  --       pattern = 'python',
+  --       callback = function()
+  --         vim.opt.foldlevel = 99
+  --         vim.opt.foldlevelstart = 99
+  --         vim.opt.foldenable = true
+  --         vim.opt.foldtext = [[v:lua.vim.treesitter.foldtext()]]
+  --       end,
+  --     })
+  --   end,
+  -- },
   -- { -- pydoc
   --   'girishji/pythondoc.vim',
   --   ft = 'python'
